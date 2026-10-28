@@ -4,16 +4,16 @@ The original `agi` runs on dos-hle-kit; only the functions at the hardware seams
 by native code. Use any decompiler you like for names and function boundaries; the kit does not
 require a particular workspace format.
 
-The seam table is split by area under `src/seams/` (video, input, sound, timing). `src/game.cpp`
-only wires the modules together.
+The seam table is split by area under `src/seams/` (video, text, input, sound, timing, file, memory,
+platform/machine). `src/game.cpp` only wires the modules together.
 
 | | |
 | :-- | :-- |
-| Game directory | `/mnt/usb_sdxc_2/Games/DOS/Gold Rush (1987)(Sierra On-Line)` (never written: writes go to `overlay/`) |
+| Game directory | Not compiled in: found at startup by `--game DIR` (or an EXE path), `$HLEKIT_GAME_DIR`, the remembered directory, `GameInfo::gameDir`, or next to the program (never written: all writes go to the overlay) |
 | Function labels | `(none)` (optional CSV: address,name,size) |
 | Seam candidates | [seam-candidates.md](seam-candidates.md) (generated from the executable) |
 | Ranked candidates | [ranked-seams.md](ranked-seams.md) (heuristic video/sound/timing/input ranking) |
-| Seam modules | `src/seams/` (by area): `file` (DOS file wrappers + overlay loader, sandboxed to the game dir, writes to `overlay/`), `memory` (startup block layout), `platform` (selects the VGA path), `timing` (60 Hz tick task, random), `input` (host key queue), `video` + `text` (VGA overlay BIOS calls, native 8x8 text console), `sound` (PC-speaker voice to host audio) |
+| Seam modules | `src/seams/` (by area): `file` (DOS file wrappers + overlay loader; reads the game dir, writes the overlay), `memory` (startup block layout), `platform` (selects the VGA path, hosts the machine/exit seams), `timing` (60 Hz tick task, random), `input` (host key queue), `video` + `text` (VGA overlay BIOS calls, native 8x8 text console), `sound` (PC-speaker voice to host audio) |
 | Support | `src/support/`: `debug` (`GR_WATCH=1`) |
 | Decompiled code | `src/decompiled/` (grows over time) |
 
@@ -52,6 +52,8 @@ the original code running on the CPU. Native code can call game functions back w
 - Graphics: `select_machine` makes the game choose `vg_graf.ovl` (mode 13h, 320x200). `load_overlay`
   re-arms three BIOS-facing seams inside the overlay each time it loads (`OverlaySeams()`).
 - Text: the game's BIOS text helpers draw 8x8 glyphs natively (the kit's `hlekit/font.h`: data fonts, resolved per mode).
-- Saves: `overlay/` (default `./overlay`, `--overlay DIR`) - the game directory is never written.
+- Saves: the overlay is a writable directory separate from the game, `--overlay DIR` or the per-user
+  default from `SDL_GetPrefPath("hlekit", "gold-rush")` (normally
+  `~/.local/share/hlekit/gold-rush/overlay` on Linux). The game directory is never written.
 
 Debug: `GR_WATCH=1` prints the guest position twice a second; `--log-services` logs file calls.

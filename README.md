@@ -162,5 +162,5 @@ Then compare with `docs/seam-candidates.md` and `docs/ranked-seams.md` to see ho
 ## Notes
 
 * You need to own the game. This repo contains only native glue code, no Sierra data and no assets.
-* The hardcoded `gameDir` in `src/game.cpp` and `docs/project.md` is a local example only. Prefer `--game` or `HLEKIT_GAME_DIR` and leave the compiled-in hint empty in anything you share.
+* No game directory is compiled in. The port finds the user's copy at startup (`--game`, `HLEKIT_GAME_DIR`, the remembered directory, or next to the program); keep `GameInfo::gameDir` empty in anything you share.
 * Built against dos-hle-kit as a library. See the kit README for CPU backends, runner options, and the full seam API.
